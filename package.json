@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/gosulap/hangfire/issues"
   },
-  "homepage": "https://github.com/gosulap/hangfire#readme"
+  "homepage": "https://github.com/gosulap/hangfire#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
 }
