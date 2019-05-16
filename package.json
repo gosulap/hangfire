@@ -1,19 +1,12 @@
 {
-  "name": "hangfire",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gosulap/hangfire.git"
-  },
-  "author": "Pradhit Gosula",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/gosulap/hangfire/issues"
-  },
-  "homepage": "https://github.com/gosulap/hangfire#readme"
+  "name": "Hangfire",
+  "version": "0.0.1",
+  "dependencies": {
+    "consolidate": "~0.10.0",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "passport": "~0.2.0",
+    "passport-spotify": "^1.0.1",
+    "swig": "~1.3.2"
+  }
 }
