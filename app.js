@@ -1,15 +1,17 @@
-var express = require('express'),
-  session = require('express-session'),
-  passport = require('passport'),
-  swig = require('swig'),
-  SpotifyStrategy = require('passport-spotify').Strategy;
-
+var express = require('express')
+var session = require('express-session')
+var passport = require('passport')
+var swig = require('swig')
+var SpotifyStrategy = require('passport-spotify').Strategy;
 var consolidate = require('consolidate');
-const axios = require('axios');
+var axios = require('axios');
 var SpotifyWebApi = require('spotify-web-api-node');
 
+// used to stores sensitive stuff 
 var appKey = process.env.HFID;
 var appSecret = process.env.HFS;
+var atoken; 
+var id; 
 
 var spotifyApi = new SpotifyWebApi({
   clientId: appKey,
@@ -37,8 +39,6 @@ passport.deserializeUser(function(obj, done) {
 //   credentials (in this case, an accessToken, refreshToken, expires_in
 //   and spotify profile), and invoke a callback with a user object.
 
-var atoken; 
-var id; 
 passport.use(
   new SpotifyStrategy(
     {
