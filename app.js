@@ -16,6 +16,7 @@ var id;
 var spotifyApi = new SpotifyWebApi({
   clientId: appKey,
   clientSecret: appSecret,
+  // if this goes official change this up 
   redirectUri: 'http://localhost:8888/callback'
 });
 
@@ -38,7 +39,6 @@ passport.deserializeUser(function(obj, done) {
 //   Strategies in Passport require a `verify` function, which accept
 //   credentials (in this case, an accessToken, refreshToken, expires_in
 //   and spotify profile), and invoke a callback with a user object.
-
 passport.use(
   new SpotifyStrategy(
     {
@@ -63,6 +63,8 @@ passport.use(
   )
 );
 
+
+// create express instance 
 var app = express();
 
 // configure Express
@@ -70,6 +72,7 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
 app.use(session({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+
 // Initialize Passport!  Also use passport.session() middleware, to support
 // persistent login sessions (recommended).
 app.use(passport.initialize());
@@ -80,21 +83,28 @@ app.use(express.static(__dirname + '/public'));
 app.engine('html', consolidate.swig);
 
 app.get('/', function(req, res) {
-  // I think we can make an axios request here using atoken 
-  // this is big fucked 
-  spotifyApi.setAccessToken(atoken)
-  
-  spotifyApi.getUserPlaylists(id, {'limit':50})
-    .then(function(data) {
-      console.log('Retrieved playlists', data.body);
-    },function(err) {
-      console.log('Something went wrong!', err);
-    });
-
     // make a helper that will take all the playlists and call the weather api a and choose the songs accordingly 
     // pass it to the user  
     res.render('index.html', { user: req.user });
   });
+
+// have the button redirect the user to the create page
+// this is where the playlist will actually be made 
+app.get('/create', function(req, res) {
+    // authorize profile use for spotifyApi 
+    spotifyApi.setAccessToken(atoken)
+  
+    // get all the users playlists (50 max)
+    spotifyApi.getUserPlaylists(id, {'limit':50})
+      .then(function(data) {
+        // probably want to pass these playlists to a helper which would
+        // return the songs to put into the playlist for today 
+        console.log('Retrieved playlists', data.body);
+      },function(err) {
+        console.log('Something went wrong!', err);
+      });
+  res.render('create.html', { user: req.user });
+});
 
 app.get('/login', function(req, res) {
   res.render('login.html', { user: req.user });

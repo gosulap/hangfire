@@ -7,6 +7,6 @@
 {% else %}
 	<h2>Hi, {{ user.displayName }}.</h2>
 	<p>Your email is {{ user.emails[0].value }}</p>
-	<button>Create Today's Playlist</button>
+	<a href="/create">Create Today's Playlist</a>
 {% endif %}
 {% endblock %}
