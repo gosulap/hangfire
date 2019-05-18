@@ -3,7 +3,7 @@
 {% block content %}
 {% if !user %}
 	<h2>Welcome! Please log in.</h2>
-	<p><a href="/login">login</a></p>
+	<a href="/auth/spotify">Login with Spotify</a>
 {% else %}
 	<h2>Hi, {{ user.displayName }}.</h2>
 	<p>Your email is {{ user.emails[0].value }}</p>
