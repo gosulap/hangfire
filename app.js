@@ -9,7 +9,7 @@ var SpotifyWebApi = require('spotify-web-api-node');
 var request = require('request');
 var rp = require('request-promise');
 
-
+// get the helpers from handlers.js 
 const {
   getTracks,
   cleanTracks,
@@ -151,6 +151,7 @@ app.get('/create', function(req, res) {
 
         // its working rn 
         addToPlaylist(clean.tracks,clean.id,atoken,rtoken)
+        // now we need to pass these tracks to create.html and render a list on the page
         res.render('create.html', { user: req.user });
       })
       .catch(function(err) {
