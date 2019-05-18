@@ -57,7 +57,7 @@ function getRandomTracks(track_ids){
         random = getRandomInt(0,track_ids.length-1)
         if(seen.has(random) == false){
             // need to clean this to be in the format so that it can be added to a playlist 
-            res.push(track_ids[random])
+            res.push("spotify:track:"+track_ids[random])
             seen.add(random)
         }
     }
@@ -90,14 +90,22 @@ function createPlaylist(atoken,rtoken,user_id){
 
 }
 
-function addToPlaylist(track_list,atoken,rtoken){
+function addToPlaylist(track_list,playlist_id,atoken,rtoken){
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
+
+    spotifyApi.addTracksToPlaylist(playlist_id, track_list)
+    .then(function(data) {
+        console.log('Added tracks to playlist!');
+    }, function(err) {
+        console.log('Something went wrong!', err);
+    });
     
 }
 
 module.exports = {
     getTracks,
     cleanTracks,
-    createPlaylist
+    createPlaylist,
+    addToPlaylist
 };

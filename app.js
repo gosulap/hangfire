@@ -14,6 +14,7 @@ const {
   getTracks,
   cleanTracks,
   createPlaylist,
+  addToPlaylist
 } = require('./handlers');
 
 
@@ -139,13 +140,15 @@ app.get('/create', function(req, res) {
         // here we can create the hangfire playlist
         return Promise.all([createPlaylist(atoken,rtoken,user_id)])
         .then((results) => {
-            return {'results':results,'clean': cleanTracks(data)}; // Result of all resolve as an array
-        }).catch(err => console.log(err));  // First rejected promise
+            return {'id':results,'tracks': cleanTracks(data)};
+        }).catch(err => console.log(err));  
       })
       .then(function(clean){
+
+        // clean has the id of the hangfire playlist and has the 50 good tracks to add 
+        // now we need to actually add these tracks to the hangfire playlist 
         console.log(clean)
-        // need to add these tracks to a the hangfire playlist 
-        // can get the id of the top playlist but ideally should just store the information in a database 
+        addToPlaylist(clean.tracks,clean.id,atoken,rtoken)
         res.render('create.html', { user: req.user });
       })
       .catch(function(err) {
