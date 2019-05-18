@@ -148,6 +148,8 @@ app.get('/create', function(req, res) {
         // clean has the id of the hangfire playlist and has the 50 good tracks to add 
         // now we need to actually add these tracks to the hangfire playlist 
         console.log(clean)
+
+        // its working rn 
         addToPlaylist(clean.tracks,clean.id,atoken,rtoken)
         res.render('create.html', { user: req.user });
       })
