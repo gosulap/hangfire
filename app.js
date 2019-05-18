@@ -4,14 +4,15 @@ var passport = require('passport')
 var swig = require('swig')
 var SpotifyStrategy = require('passport-spotify').Strategy;
 var consolidate = require('consolidate');
-var axios = require('axios');
 var SpotifyWebApi = require('spotify-web-api-node');
+var request = require('request');
 
 // used to stores sensitive stuff 
 var appKey = process.env.HFID;
 var appSecret = process.env.HFS;
 var atoken; 
-var id; 
+var rtoken; 
+var user_id; 
 
 var spotifyApi = new SpotifyWebApi({
   clientId: appKey,
@@ -56,7 +57,8 @@ passport.use(
         
         // we need to use the accesstoken and the user id later
         atoken = accessToken
-        id = profile.id
+        rtoken = refreshToken
+        user_id = profile.id
         return done(null, profile);
       });
     }
@@ -88,22 +90,34 @@ app.get('/', function(req, res) {
     res.render('index.html', { user: req.user });
   });
 
+
 // have the button redirect the user to the create page
 // this is where the playlist will actually be made 
 app.get('/create', function(req, res) {
-    // authorize profile use for spotifyApi 
+    // authorize profile use for spotifyApi - dont need this if using request 
     spotifyApi.setAccessToken(atoken)
-  
-    // get all the users playlists (50 max)
-    spotifyApi.getUserPlaylists(id, {'limit':50})
-      .then(function(data) {
-        // probably want to pass these playlists to a helper which would
-        // return the songs to put into the playlist for today 
-        console.log('Retrieved playlists', data.body);
-      },function(err) {
-        console.log('Something went wrong!', err);
+    spotifyApi.setRefreshToken(rtoken);
+
+
+    // get my playlists  
+    const getPlaylistOptions = {
+      url: `https://api.spotify.com/v1/users/${user_id}/playlists`,
+      headers: { 'Authorization': `Bearer ${atoken}` },
+      json: true
+    }
+
+    const getPlaylist = {
+      url: `https://api.spotify.com/v1/playlists/6i0aRaI5lKg3wfgqGvkAkw/tracks`,
+      headers: { 'Authorization': `Bearer ${atoken}` },
+      json: true
+    }
+
+    request.get(getPlaylistOptions, (error, response, body) => {
+      request.get(getPlaylist, (error, response, body) => {
+        console.log(body.items[0].track)
       });
-  res.render('create.html', { user: req.user });
+    });
+    res.render('create.html', { user: req.user });
 });
 
 app.get('/login', function(req, res) {
