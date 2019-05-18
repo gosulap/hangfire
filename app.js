@@ -11,7 +11,9 @@ var rp = require('request-promise');
 
 
 const {
-  getTracks
+  getTracks,
+  cleanTracks,
+  createPlaylist
 } = require('./handlers');
 
 
@@ -94,7 +96,7 @@ app.engine('html', consolidate.swig);
 
 app.get('/', function(req, res) {
     // make a helper that will take all the playlists and call the weather api a and choose the songs accordingly 
-    // pass it to the user  
+    // pass it to the user 
     res.render('index.html', { user: req.user });
   });
 
@@ -131,14 +133,20 @@ app.get('/create', function(req, res) {
         }).catch(err => console.log(err));  
       })
       .then(function(data){
-        // in here there is an array of dicts where dicts.items are the tracks in each playlist 
-        // from here we need to go through each track and for now randomly choose 50 and put them in a playlist 
-        console.log(data)
+        // after the clean tracks call we have 50 random tracks 
+        // now we need to make a playlist and put them in there 
+
+        // here we can create the hangfire playlist
+        createPlaylist(atoken,rtoken,user_id)
+        return cleanTracks(data)
+      })
+      .then(function(clean){
+        console.log(clean)
         res.render('create.html', { user: req.user });
       })
       .catch(function(err) {
         console.log('Something went wrong!', err);
-        res.redirect('error.html')
+        res.render('error.html')
       })
 
 });
