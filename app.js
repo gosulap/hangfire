@@ -5,7 +5,15 @@ var swig = require('swig')
 var SpotifyStrategy = require('passport-spotify').Strategy;
 var consolidate = require('consolidate');
 var SpotifyWebApi = require('spotify-web-api-node');
+// use one or the other 
 var request = require('request');
+var rp = require('request-promise');
+
+
+const {
+  getTracks
+} = require('./handlers');
+
 
 // used to stores sensitive stuff 
 var appKey = process.env.HFID;
@@ -98,26 +106,41 @@ app.get('/create', function(req, res) {
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
 
+    // get my playlists 
+    spotifyApi.getUserPlaylists(user_id,{ limit : 50})
+      .then(function(data) {
+        var playlist_ids = []
+        for(var i = 0;i<data.body.items.length;i++){
+          playlist_ids.push(data.body.items[i].id)
+        }
+        return playlist_ids
+      })
+      .then(function(ids){
+        // here we have the ids of my playlists 
+        // use a helper in handlers to take the id list and return a list of all the track ids 
+        // params : ids,atoken,rtoken
 
-    // get my playlists  
-    const getPlaylistOptions = {
-      url: `https://api.spotify.com/v1/users/${user_id}/playlists`,
-      headers: { 'Authorization': `Bearer ${atoken}` },
-      json: true
-    }
+        return Promise.all([getTracks(ids,atoken,rtoken)])
+        .then((results) => {
+            // change the second 0 to move through playlists 
+            var tracks =[]
+            for(var i=0;i<results[0].length;i++){
+              tracks.push(results[0][i].body.tracks)
+            }
+            return tracks; 
+        }).catch(err => console.log(err));  
+      })
+      .then(function(data){
+        // in here there is an array of dicts where dicts.items are the tracks in each playlist 
+        // from here we need to go through each track and for now randomly choose 50 and put them in a playlist 
+        console.log(data)
+        res.render('create.html', { user: req.user });
+      })
+      .catch(function(err) {
+        console.log('Something went wrong!', err);
+        res.redirect('error.html')
+      })
 
-    const getPlaylist = {
-      url: `https://api.spotify.com/v1/playlists/6i0aRaI5lKg3wfgqGvkAkw/tracks`,
-      headers: { 'Authorization': `Bearer ${atoken}` },
-      json: true
-    }
-
-    request.get(getPlaylistOptions, (error, response, body) => {
-      request.get(getPlaylist, (error, response, body) => {
-        console.log(body.items[0].track)
-      });
-    });
-    res.render('create.html', { user: req.user });
 });
 
 // GET /auth/spotify
