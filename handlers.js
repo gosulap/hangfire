@@ -56,6 +56,7 @@ function getRandomTracks(track_ids){
     while(res.length < 50){
         random = getRandomInt(0,track_ids.length-1)
         if(seen.has(random) == false){
+            // need to clean this to be in the format so that it can be added to a playlist 
             res.push(track_ids[random])
             seen.add(random)
         }
@@ -73,19 +74,27 @@ function createPlaylist(atoken,rtoken,user_id){
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
 
-    spotifyApi.createPlaylist(user_id,'Hangfire', { 'public' : false})
+    var ps = []
+
+    ps.push(spotifyApi.createPlaylist(user_id,'Hangfire', { 'public' : false})
     .then(function(data) {
-        console.log('Created playlist!');
+        return data.body.id
     }, function(err) {
         console.log('Something went wrong!', err);
-    });
+    }))
+
+    return Promise.all(ps)
+    .then((results) => {
+        return results; // Result of all resolve as an array
+    }).catch(err => console.log(err));  // First rejected promise
+
 }
+
 function addToPlaylist(track_list,atoken,rtoken){
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
     
 }
-
 
 module.exports = {
     getTracks,
