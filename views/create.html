@@ -8,5 +8,10 @@
 </head>
 <body>
     <h1>Create Page</h1>
+    {% if tracks %}
+        {% for track in tracks %}
+            <p>{{track}}<p>
+        {% endfor %}
+    {% endif %}
 </body>
 </html>

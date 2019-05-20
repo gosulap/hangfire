@@ -7,6 +7,11 @@ var spotifyApi = new SpotifyWebApi({
     redirectUri: 'http://localhost:8888/callback'
   });
 
+
+// save the track names in this 
+var track_names = []
+var final_tracks = []
+
 function getTracks(ids,atoken,rtoken){
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
@@ -25,6 +30,8 @@ function getTracks(ids,atoken,rtoken){
 }
 
 function cleanTracks(playlists){
+
+    // this first part puts all the track objects from all the playlists in an array 
     var final = []
     var seen = new Set();
     for(var i = 0;i<playlists.length;i++){
@@ -40,6 +47,7 @@ function cleanTracks(playlists){
         if(seen.has(final[i].track.id) == false)
         {
             track_ids.push(final[i].track.id)
+            track_names.push(final[i].track.name)
             seen.add(final[i].track.id)
         }
     }
@@ -56,8 +64,9 @@ function getRandomTracks(track_ids){
     while(res.length < 50){
         random = getRandomInt(0,track_ids.length-1)
         if(seen.has(random) == false){
-            // need to clean this to be in the format so that it can be added to a playlist 
+            // this is the format needed to be able to be added to playlist 
             res.push("spotify:track:"+track_ids[random])
+            final_tracks.push(track_names[random])
             seen.add(random)
         }
     }
@@ -107,5 +116,6 @@ module.exports = {
     getTracks,
     cleanTracks,
     createPlaylist,
-    addToPlaylist
+    addToPlaylist, 
+    final_tracks
 };

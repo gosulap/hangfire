@@ -1,6 +1,7 @@
 var express = require('express')
 var session = require('express-session')
 var passport = require('passport')
+// swig is a jinja like template engine for node 
 var swig = require('swig')
 var SpotifyStrategy = require('passport-spotify').Strategy;
 var consolidate = require('consolidate');
@@ -14,7 +15,8 @@ const {
   getTracks,
   cleanTracks,
   createPlaylist,
-  addToPlaylist
+  addToPlaylist,
+  final_tracks
 } = require('./handlers');
 
 
@@ -25,6 +27,8 @@ var atoken;
 var rtoken; 
 var user_id; 
 
+
+// set up the wrapper to use 
 var spotifyApi = new SpotifyWebApi({
   clientId: appKey,
   clientSecret: appSecret,
@@ -36,7 +40,7 @@ var spotifyApi = new SpotifyWebApi({
 //   To support persistent login sessions, Passport needs to be able to
 //   serialize users into and deserialize users out of the session. Typically,
 //   this will be as simple as storing the user ID when serializing, and finding
-//   the user by ID when deserializing. However, since this example does not
+//   the user by ID when deserializing. However, since this does not
 //   have a database of user records, the complete spotify profile is serialized
 //   and deserialized.
 passport.serializeUser(function(user, done) {
@@ -66,7 +70,7 @@ passport.use(
         // to associate the spotify account with a user record in your database,
         // and return that user instead.
         
-        // we need to use the accesstoken and the user id later
+        // we need to use the accesstoken, refreshtoken and the user id later
         atoken = accessToken
         rtoken = refreshToken
         user_id = profile.id
@@ -80,7 +84,7 @@ passport.use(
 // create express instance 
 var app = express();
 
-// configure Express
+// configure Express to look for views in the views folder 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
@@ -91,13 +95,13 @@ app.use(session({ secret: 'keyboard cat', resave: true, saveUninitialized: true 
 app.use(passport.initialize());
 app.use(passport.session());
 
+// let express know where to look for static files - i dont think this does anything rn idk why i put this here, probably will if i add js files to the html 
 app.use(express.static(__dirname + '/public'));
 
 app.engine('html', consolidate.swig);
 
 app.get('/', function(req, res) {
-    // make a helper that will take all the playlists and call the weather api a and choose the songs accordingly 
-    // pass it to the user 
+    // render the home page 
     res.render('index.html', { user: req.user });
   });
 
@@ -109,7 +113,7 @@ app.get('/create', function(req, res) {
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
 
-    // get my playlists 
+    // get my playlists - need to find a way to get all the playlists in case people have more than 50 
     spotifyApi.getUserPlaylists(user_id,{ limit : 50})
       .then(function(data) {
         var playlist_ids = []
@@ -152,7 +156,9 @@ app.get('/create', function(req, res) {
         // its working rn 
         addToPlaylist(clean.tracks,clean.id,atoken,rtoken)
         // now we need to pass these tracks to create.html and render a list on the page
-        res.render('create.html', { user: req.user });
+
+        console.log(final_tracks)
+        res.render('create.html', { tracks: final_tracks });
       })
       .catch(function(err) {
         console.log('Something went wrong!', err);
@@ -203,6 +209,8 @@ app.listen(8888, () => console.log("Listening..."));
 //   the request is authenticated (typically via a persistent login session),
 //   the request will proceed. Otherwise, the user will be redirected to the
 //   login page.
+
+// probably can get rid of this 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
