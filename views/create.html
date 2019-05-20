@@ -9,8 +9,9 @@
 <body>
     <h1>Create Page</h1>
     {% if tracks %}
+        <h3>Songs In Todays Playlist:</h3>
         {% for track in tracks %}
-            <p>{{track}}<p>
+            <p>{{tracks[loop.index0]}} by {{artists[loop.index0]}}<p>
         {% endfor %}
     {% endif %}
 </body>

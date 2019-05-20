@@ -16,7 +16,8 @@ const {
   cleanTracks,
   createPlaylist,
   addToPlaylist,
-  final_tracks
+  final_tracks,
+  final_artists
 } = require('./handlers');
 
 
@@ -158,7 +159,7 @@ app.get('/create', function(req, res) {
         // now we need to pass these tracks to create.html and render a list on the page
 
         console.log(final_tracks)
-        res.render('create.html', { tracks: final_tracks });
+        res.render('create.html', { tracks: final_tracks, artists: final_artists});
       })
       .catch(function(err) {
         console.log('Something went wrong!', err);
