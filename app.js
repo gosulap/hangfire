@@ -139,6 +139,7 @@ app.get('/create', function(req, res) {
         }).catch(err => console.log(err));  
       })
       .then(function(data){
+        console.log(data)
         // after the clean tracks call we have 50 random tracks 
         // now we need to make a playlist and put them in there 
 
