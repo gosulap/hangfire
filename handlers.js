@@ -34,7 +34,7 @@ function getTracks(ids,atoken,rtoken){
     }).catch(err => console.log(err));  // First rejected promise
 }
 
-function cleanTracks(playlists){
+function cleanTracks(playlists,test_final,test_artist){
 
     // this first part puts all the track objects from all the playlists in an array 
     var final = []
@@ -60,11 +60,11 @@ function cleanTracks(playlists){
 
     // here track_ids has unique tracks 
     // now we need to choose a random 50 
-    res = getRandomTracks(track_ids)
+    res = getRandomTracks(track_ids,test_final,test_artist)
     return res 
 }
 
-function getRandomTracks(track_ids){
+function getRandomTracks(track_ids,test_final,test_artist){
     var res = []
     var seen = new Set();
     while(res.length < 50){
@@ -72,8 +72,8 @@ function getRandomTracks(track_ids){
         if(seen.has(random) == false){
             // this is the format needed to be able to be added to playlist 
             res.push("spotify:track:"+track_ids[random])
-            final_tracks.push(track_names[random])
-            final_artists.push(artist_names[random])
+            test_final.push(track_names[random])
+            test_artist.push(artist_names[random])
             seen.add(random)
         }
     }

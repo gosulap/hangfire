@@ -16,8 +16,6 @@ const {
   cleanTracks,
   createPlaylist,
   addToPlaylist,
-  final_tracks,
-  final_artists
 } = require('./handlers');
 
 
@@ -96,7 +94,7 @@ app.use(session({ secret: 'keyboard cat', resave: true, saveUninitialized: true 
 app.use(passport.initialize());
 app.use(passport.session());
 
-// let express know where to look for static files - i dont think this does anything rn idk why i put this here, probably will if i add js files to the html 
+// let express know where to look for static files - for the css pretty much 
 app.use(express.static(__dirname + '/public'));
 
 app.engine('html', consolidate.swig);
@@ -110,6 +108,9 @@ app.get('/', function(req, res) {
 // have the button redirect the user to the create page
 // this is where the playlist will actually be made 
 app.get('/create', function(req, res) {
+    // storing the final songs and artists
+    var final_tracks = []; 
+    var final_artists = [];
     // authorize profile use for spotifyApi - dont need this if using request 
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
@@ -146,7 +147,7 @@ app.get('/create', function(req, res) {
         // here we can create the hangfire playlist
         return Promise.all([createPlaylist(atoken,rtoken,user_id)])
         .then((results) => {
-            return {'id':results,'tracks': cleanTracks(data)};
+            return {'id':results,'tracks': cleanTracks(data,final_tracks,final_artists)};
         }).catch(err => console.log(err));  
       })
       .then(function(clean){
@@ -159,7 +160,6 @@ app.get('/create', function(req, res) {
         addToPlaylist(clean.tracks,clean.id,atoken,rtoken)
         // now we need to pass these tracks to create.html and render a list on the page
 
-        console.log(final_tracks)
         res.render('create.html', { tracks: final_tracks, artists: final_artists});
       })
       .catch(function(err) {
