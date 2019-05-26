@@ -52,12 +52,18 @@ function cleanTracks(playlists,test_final,test_artist){
         if(seen.has(final[i].track.id) == false)
         {
             track_ids.push(final[i].track.id)
+            console.log(final[i].track.id)
             track_names.push(final[i].track.name)
+            console.log(final[i].track.name)
             artist_names.push(final[i].track.artists[0].name)
+            console.log(final[i].track.artists[0].name)
             seen.add(final[i].track.id)
         }
     }
 
+    console.log(track_ids.length)
+    console.log(track_names.length)
+    console.log(artist_names.length)
     // here track_ids has unique tracks 
     // now we need to choose a random 50 
     res = getRandomTracks(track_ids,test_final,test_artist)
@@ -73,13 +79,15 @@ function getRandomTracks(track_ids,test_final,test_artist){
         if(seen.has(random) == false){
             // this is the format needed to be able to be added to playlist 
             res.push("spotify:track:"+track_ids[random])
-            console.log(track_names[random])
+            
             test_final.push(track_names[random])
-            console.log(artist_names[random])
+    
             test_artist.push(artist_names[random])
             seen.add(random)
         }
     }
+    track_names = [];
+    artist_names = []; 
     return res 
 }
 
