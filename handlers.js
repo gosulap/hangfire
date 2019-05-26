@@ -68,11 +68,14 @@ function getRandomTracks(track_ids,test_final,test_artist){
     var res = []
     var seen = new Set();
     while(res.length < 50){
+        
         random = getRandomInt(0,track_ids.length-1)
         if(seen.has(random) == false){
             // this is the format needed to be able to be added to playlist 
             res.push("spotify:track:"+track_ids[random])
+            console.log(track_names[random])
             test_final.push(track_names[random])
+            console.log(artist_names[random])
             test_artist.push(artist_names[random])
             seen.add(random)
         }

@@ -115,10 +115,28 @@ app.get('/create', function(req, res) {
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
 
+    /*
+    spotifyApi.clientCredentialsGrant().then(
+      function(data) {
+        console.log('The access token expires in ' + data.body['expires_in']);
+        console.log('The access token is ' + data.body['access_token']);
+    
+        // Save the access token so that it's used in future calls
+        spotifyApi.setAccessToken(data.body['access_token']);
+      },
+      function(err) {
+        console.log(
+          'Something went wrong when retrieving an access token',
+          err.message
+        );
+      }
+    );
+    */ 
+
     // get my playlists - need to find a way to get all the playlists in case people have more than 50 
     spotifyApi.getUserPlaylists(user_id,{ limit : 50})
       .then(function(data) {
-        var playlist_ids = []
+        var playlist_ids = []; 
         for(var i = 0;i<data.body.items.length;i++){
           playlist_ids.push(data.body.items[i].id)
         }
@@ -140,7 +158,7 @@ app.get('/create', function(req, res) {
         }).catch(err => console.log(err));  
       })
       .then(function(data){
-        console.log(data)
+        //console.log(data)
         // after the clean tracks call we have 50 random tracks 
         // now we need to make a playlist and put them in there 
 
@@ -154,12 +172,14 @@ app.get('/create', function(req, res) {
 
         // clean has the id of the hangfire playlist and has the 50 good tracks to add 
         // now we need to actually add these tracks to the hangfire playlist 
-        console.log(clean)
+        //console.log(clean)
 
         // its working rn 
+    
         addToPlaylist(clean.tracks,clean.id,atoken,rtoken)
         // now we need to pass these tracks to create.html and render a list on the page
-
+        //console.log(final_tracks)
+        //console.log(clean.tracks)
         res.render('create.html', { tracks: final_tracks, artists: final_artists});
       })
       .catch(function(err) {
