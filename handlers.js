@@ -120,7 +120,7 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function createPlaylist(atoken,rtoken,user_id,in_mongo){
+async function createPlaylist(atoken,rtoken,user_id,in_mongo){
 
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
@@ -129,7 +129,12 @@ function createPlaylist(atoken,rtoken,user_id,in_mongo){
     // check if the userid is in the database, if it is remove all the tracks from that playlist and return that playlist id 
     // if the user is in the databse set in_mongo[0] == true 
     // this finishes after the if executes 
-    isUserInMongo(user_id,in_mongo)
+
+
+    var documents = await isUserInMongo(user_id,in_mongo)
+    if(documents.length > 0){
+        in_mongo[0] = true
+    }
 
     var ps = []
 
@@ -145,6 +150,12 @@ function createPlaylist(atoken,rtoken,user_id,in_mongo){
     else{
         // need to get the users playlist id 
         console.log("in else")
+        ps.push(spotifyApi.createPlaylist(user_id,'Hangfire', { 'public' : false})
+        .then(function(data) {
+            return data.body.id
+        }, function(err) {
+            console.log('Something went wrong!', err);
+        }))
     }
 
 
@@ -169,17 +180,7 @@ function addToPlaylist(track_list,playlist_id,atoken,rtoken){
 }
 
 function isUserInMongo(user_id,in_mongo){
-    User.find({ spotifyId: user_id }, function (err, docs) {
-        if (err){
-            console.log(err)
-        }
-        else{
-            console.log("found a user")
-            if(docs.length > 0){
-                in_mongo[0] = true
-            }
-        }
-    });
+    return User.find({ spotifyId: user_id }).exec()
 }
 
 // if the user has used hangfire theyll have  a playlist id 
