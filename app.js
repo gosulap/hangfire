@@ -6,6 +6,8 @@ var swig = require('swig')
 var SpotifyStrategy = require('passport-spotify').Strategy;
 var consolidate = require('consolidate');
 var SpotifyWebApi = require('spotify-web-api-node');
+var mongoose = require('mongoose')
+var User = require('./models/user')
 // use one or the other 
 var request = require('request');
 var rp = require('request-promise');
@@ -19,12 +21,13 @@ const {
 } = require('./handlers');
 
 
-// used to stores sensitive stuff 
+// used to stores sensitive stuff and other random information 
 var appKey = process.env.HFID;
 var appSecret = process.env.HFS;
 var atoken; 
 var rtoken; 
 var user_id; 
+var in_mongo = [false]; 
 
 
 // set up the wrapper to use 
@@ -115,24 +118,6 @@ app.get('/create', function(req, res) {
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
 
-    /*
-    spotifyApi.clientCredentialsGrant().then(
-      function(data) {
-        console.log('The access token expires in ' + data.body['expires_in']);
-        console.log('The access token is ' + data.body['access_token']);
-    
-        // Save the access token so that it's used in future calls
-        spotifyApi.setAccessToken(data.body['access_token']);
-      },
-      function(err) {
-        console.log(
-          'Something went wrong when retrieving an access token',
-          err.message
-        );
-      }
-    );
-    */ 
-
     // get my playlists - need to find a way to get all the playlists in case people have more than 50 
     spotifyApi.getUserPlaylists(user_id,{ limit : 50})
       .then(function(data) {
@@ -163,7 +148,7 @@ app.get('/create', function(req, res) {
         // now we need to make a playlist and put them in there 
 
         // here we can create the hangfire playlist
-        return Promise.all([createPlaylist(atoken,rtoken,user_id)])
+        return Promise.all([createPlaylist(atoken,rtoken,user_id,in_mongo)])
         .then((results) => {
             return {'id':results,'tracks': cleanTracks(data,final_tracks,final_artists)};
         }).catch(err => console.log(err));  
@@ -175,6 +160,19 @@ app.get('/create', function(req, res) {
         //console.log(clean)
 
         // its working rn 
+
+        // if the user is not in the database make a new user rn with the clean.id
+        console.log(in_mongo)
+        if(in_mongo[0] == false)
+        {
+          console.log("making user")
+          var new_User = new User({_id:mongoose.Types.ObjectId(),spotifyId:user_id,playlistId:clean.id[0][0]})
+          
+          new_User.save(function (err, new_User) {
+            if (err) return console.error(err);
+            console.log(new_User.spotifyId + " saved");
+          });
+        }
     
         addToPlaylist(clean.tracks,clean.id,atoken,rtoken)
         // now we need to pass these tracks to create.html and render a list on the page

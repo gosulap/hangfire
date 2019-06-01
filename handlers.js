@@ -1,4 +1,15 @@
 var SpotifyWebApi = require('spotify-web-api-node');
+var mongoose = require('mongoose')
+var User = require('./models/user')
+
+// connect to the databse 
+mongoose.connect('mongodb+srv://pradhitg:'+process.env.MGPWD+'@hangfire-vebds.mongodb.net/test?retryWrites=true&w=majority', {
+    auth: {
+      user: 'pradhitg',
+      password: process.env.MGPWD
+    },
+    useNewUrlParser: true 
+})
 
 var spotifyApi = new SpotifyWebApi({
     clientId: process.env.HFID,
@@ -34,6 +45,21 @@ function getTracks(ids,atoken,rtoken){
     }).catch(err => console.log(err));  // First rejected promise
 }
 
+
+function checkLength(id){
+    spotifyApi.getPlaylist(id)
+        .then(function(data) {
+            return data.body.tracks.total > 100
+        }, function(err) {
+            console.log('Something went wrong!', err);
+        });
+}
+
+// probably dont need this, this doesnt even do what i want it to 
+function resolveCL(id){
+    return checkLength(id) 
+}
+
 function cleanTracks(playlists,test_final,test_artist){
 
     // this first part puts all the track objects from all the playlists in an array 
@@ -52,18 +78,15 @@ function cleanTracks(playlists,test_final,test_artist){
         if(seen.has(final[i].track.id) == false)
         {
             track_ids.push(final[i].track.id)
-            console.log(final[i].track.id)
+        
             track_names.push(final[i].track.name)
-            console.log(final[i].track.name)
+           
             artist_names.push(final[i].track.artists[0].name)
-            console.log(final[i].track.artists[0].name)
+        
             seen.add(final[i].track.id)
         }
     }
 
-    console.log(track_ids.length)
-    console.log(track_names.length)
-    console.log(artist_names.length)
     // here track_ids has unique tracks 
     // now we need to choose a random 50 
     res = getRandomTracks(track_ids,test_final,test_artist)
@@ -97,18 +120,33 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function createPlaylist(atoken,rtoken,user_id){
+function createPlaylist(atoken,rtoken,user_id,in_mongo){
+
     spotifyApi.setAccessToken(atoken)
     spotifyApi.setRefreshToken(rtoken);
 
+
+    // check if the userid is in the database, if it is remove all the tracks from that playlist and return that playlist id 
+    // if the user is in the databse set in_mongo[0] == true 
+    // this finishes after the if executes 
+    isUserInMongo(user_id,in_mongo)
+
     var ps = []
 
-    ps.push(spotifyApi.createPlaylist(user_id,'Hangfire', { 'public' : false})
-    .then(function(data) {
-        return data.body.id
-    }, function(err) {
-        console.log('Something went wrong!', err);
-    }))
+    if (in_mongo[0] == false){
+        console.log("in if")
+        ps.push(spotifyApi.createPlaylist(user_id,'Hangfire', { 'public' : false})
+        .then(function(data) {
+            return data.body.id
+        }, function(err) {
+            console.log('Something went wrong!', err);
+        }))
+    }
+    else{
+        // need to get the users playlist id 
+        console.log("in else")
+    }
+
 
     return Promise.all(ps)
     .then((results) => {
@@ -129,6 +167,23 @@ function addToPlaylist(track_list,playlist_id,atoken,rtoken){
     });
     
 }
+
+function isUserInMongo(user_id,in_mongo){
+    User.find({ spotifyId: user_id }, function (err, docs) {
+        if (err){
+            console.log(err)
+        }
+        else{
+            console.log("found a user")
+            if(docs.length > 0){
+                in_mongo[0] = true
+            }
+        }
+    });
+}
+
+// if the user has used hangfire theyll have  a playlist id 
+// if that exists then remove all the tracks from that playlist and call add to playlist with that id 
 
 module.exports = {
     getTracks,
