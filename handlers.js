@@ -138,11 +138,13 @@ async function createPlaylist(atoken,rtoken,user_id,in_mongo){
 
     var ps = []
 
+    // need to have creating playlist and removing songs from playlists in helpers 
     if (in_mongo[0] == false){
         console.log("in if")
         ps.push(spotifyApi.createPlaylist(user_id,'Hangfire', { 'public' : false})
         .then(function(data) {
-            return data.body.id
+            // in data body there is a snapshot id need to put this in the user  
+            return [data.body.id,data.body.snapshotId] 
         }, function(err) {
             console.log('Something went wrong!', err);
         }))
@@ -152,7 +154,8 @@ async function createPlaylist(atoken,rtoken,user_id,in_mongo){
         console.log("in else")
         ps.push(spotifyApi.createPlaylist(user_id,'Hangfire', { 'public' : false})
         .then(function(data) {
-            return data.body.id
+            console.log(documents[0].playlistId)
+            return documents[0].playlistId
         }, function(err) {
             console.log('Something went wrong!', err);
         }))
