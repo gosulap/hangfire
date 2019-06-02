@@ -144,7 +144,8 @@ async function createPlaylist(atoken,rtoken,user_id,in_mongo){
         ps.push(spotifyApi.createPlaylist(user_id,'Hangfire', { 'public' : false})
         .then(function(data) {
             // in data body there is a snapshot id need to put this in the user  
-            return [data.body.id,data.body.snapshotId] 
+            console.log(data.body)
+            return [data.body.id,data.body.snapshot_id] 
         }, function(err) {
             console.log('Something went wrong!', err);
         }))
