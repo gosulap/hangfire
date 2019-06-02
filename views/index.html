@@ -5,7 +5,9 @@
 	<h2>Welcome! Please log in.</h2>
 	<a href="/auth/spotify">Login with Spotify</a>
 {% else %}
-	<h2>Hi, {{ user.displayName }}.</h2>
-	<a href="/create">Create Today's Playlist</a>
+	<div id="home-info">
+		<h2>Hi, {{ user.displayName }}.</h2>
+		<a href="/create">Create Playlist</a>
+	</div>
 {% endif %}
 {% endblock %}
