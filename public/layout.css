@@ -1,0 +1,13 @@
+body {
+    padding-left: 10px;
+    background-image: url("/bg.jpg");
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+
+.home-info{
+    padding-left: 200px;
+}

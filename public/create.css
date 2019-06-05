@@ -1,0 +1,23 @@
+body {
+    padding-left: 10px;
+    background-image: url("/bg2.jpg");
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    padding-bottom: 20px;
+}
+ul li { 
+    float:left;
+    padding-right: 30px;
+    width: 400px;
+    color: white
+}
+
+h3{
+    color: white
+}
+p.artist{
+    font-style: italic;
+    display: inline;
+}
