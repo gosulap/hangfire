@@ -145,18 +145,18 @@ async function createPlaylist(atoken,rtoken,user_id,in_mongo){
         .then(function(data) {
             // in data body there is a snapshot id need to put this in the user  
             console.log(data.body)
-            return [data.body.id,data.body.snapshot_id] 
+            return data.body.id 
         }, function(err) {
             console.log('Something went wrong!', err);
         }))
     }
     else{
-        // need to get the users playlist id 
+        // need to get the users playlist id - this else is here so that it is easy to change this function based on if someone is in mongo or not 
         console.log("in else")
         ps.push(spotifyApi.createPlaylist(user_id,'Hangfire', { 'public' : false})
         .then(function(data) {
-            console.log(documents[0].playlistId)
-            return documents[0].playlistId
+            console.log(data.body)
+            return data.body.id
         }, function(err) {
             console.log('Something went wrong!', err);
         }))

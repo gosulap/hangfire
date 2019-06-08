@@ -166,15 +166,17 @@ app.get('/create', function(req, res) {
         if(in_mongo[0] == false)
         {
           console.log("making user")
-          var new_User = new User({_id:mongoose.Types.ObjectId(),spotifyId:user_id,playlistId:clean.id[0][0][0],snapshotId:clean.id[0][0][1]})
+          var new_User = new User({_id:mongoose.Types.ObjectId(),spotifyId:user_id,playlistId:clean.id[0][0]})
           
           new_User.save(function (err, new_User) {
             if (err) return console.error(err);
             console.log(new_User.spotifyId + " saved");
           });
         }
-        console.log(clean.id[0])
-        addToPlaylist(clean.tracks,clean.id[0][0][0],atoken,rtoken)
+        console.log(clean.id[0][0])
+        console.log(clean.tracks)
+
+        addToPlaylist(clean.tracks,clean.id[0][0],atoken,rtoken)
         // now we need to pass these tracks to create.html and render a list on the page
         //console.log(final_tracks)
         //console.log(clean.tracks)
